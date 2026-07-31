@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Rbac.Models;
+using RbacApi.Models;
 
-namespace Rbac.Data
+namespace RbacApi.Data
 {
     public class AppDbContext : DbContext
     {

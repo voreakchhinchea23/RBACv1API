@@ -1,4 +1,4 @@
-namespace Rbac.Models
+namespace RbacApi.Models
 {
     public class Role
     {

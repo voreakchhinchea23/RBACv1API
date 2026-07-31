@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Rbac.Data;
+using RbacApi.Data;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,7 +25,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthorization();
 
+// Map the Controllers
+app.MapControllers();
 
 app.Run();
 

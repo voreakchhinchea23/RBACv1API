@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "ERzpSqC/0IM=",
+  "dgSpecHash": "e0iWE7yNHRU=",
   "success": true,
   "projectFilePath": "D:\\all_programming\\visual_studio\\asp_net_core\\webapi\\RbacApi\\RbacApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\VoreakChhinchea\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\VoreakChhinchea\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",
+    "C:\\Users\\VoreakChhinchea\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
     "C:\\Users\\VoreakChhinchea\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\VoreakChhinchea\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.9\\microsoft.aspnetcore.openapi.10.0.9.nupkg.sha512",
     "C:\\Users\\VoreakChhinchea\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\8.0.0\\microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",

@@ -157,3 +157,5 @@ D:\all_programming\visual_studio\asp_net_core\webapi\RbacApi\bin\Debug\net10.0\r
 D:\all_programming\visual_studio\asp_net_core\webapi\RbacApi\bin\Debug\net10.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
 D:\all_programming\visual_studio\asp_net_core\webapi\RbacApi\bin\Debug\net10.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 D:\all_programming\visual_studio\asp_net_core\webapi\RbacApi\bin\Debug\net10.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+D:\all_programming\visual_studio\asp_net_core\webapi\RbacApi\obj\Debug\net10.0\RbacApi.sourcelink.json
+D:\all_programming\visual_studio\asp_net_core\webapi\RbacApi\bin\Debug\net10.0\BCrypt-Net-Next.dll
