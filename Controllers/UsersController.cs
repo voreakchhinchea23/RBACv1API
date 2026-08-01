@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RbacApi.Data;
 using RbacApi.DTOs;
 using RbacApi.Models;
+using RbacApi.Services.Users;
 
 namespace RbacApi.Controllers
 {
@@ -10,65 +11,65 @@ namespace RbacApi.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public UsersController(AppDbContext context)
+        private readonly IUserService _userService;
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         // GET: api/users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetsUsers()
         {
-            // LINQ Projection
-            var users = await _context.Users
-                .Include(u => u.Role)
-                .Select(u => new UserResponseDto
-                {
-                    Id = u.Id,
-                    Username = u.Username,
-                    Email = u.Email,
-                    IsActive = u.IsActive,
-                    Phone = u.Phone,
-                    RoleName = u.Role != null ? u.Role.Name : "No Role"
-                }).ToListAsync();
-
+            var users = await _userService.GetUsersAsync();
             return Ok(users);
+        }
+
+        // GET: api/users/id
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<UserResponseDto>> GetUserById(int id)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound(new { message = $"User not found." });
+            }
+
+            return Ok(user);
         }
 
         // POST: api/users
         [HttpPost]
         public async Task<ActionResult<UserResponseDto>> CreateUser(UserCreateDTO dto)
         {
-            // Hash password using BCrypt
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+            var createdUser = await _userService.CreateUserAsync(dto);
+            return CreatedAtAction(nameof(GetsUsers), new { id = createdUser.Id }, createdUser);
+        }
 
-            var newUser = new User
+        //PUT api/users/id
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> UpdateUser(UserUpdateDto dto, int id)
+        {
+            var success = await _userService.UpdateUserAsync(dto, id);
+
+            if (!success)
             {
-                Username = dto.Username,
-                Email = dto.Email,
-                Password = passwordHash,
-                Phone = dto.Phone,
-                RoleId = dto.RoleId,
-                IsActive = true
-            };
+                return NotFound(new { message = $"User not found." });
+            }
+            return NoContent();
+        }
 
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
-
-            var role = await _context.Roles.FindAsync(dto.RoleId);
-
-            var responseDto = new UserResponseDto
+        // DELETE api/users/id
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> DeleteUser(int id)
+        {
+            var success = await _userService.DeleteUserAsync(id);
+            if (!success)
             {
-                Id = newUser.Id,
-                Username = newUser.Username,
-                Email = newUser.Email,
-                Phone = newUser.Phone,
-                IsActive = newUser.IsActive,
-                RoleName = role != null ? role.Name : "No Role"
-            };
-
-            return CreatedAtAction(nameof(GetsUsers), new {id = newUser.Id}, responseDto);
+                return NotFound(new { message = $"User not found." });
+            }
+            return NoContent();
         }
     }
 }
