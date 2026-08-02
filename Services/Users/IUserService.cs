@@ -1,6 +1,6 @@
 using RbacApi.DTOs;
 
-namespace RbacApi.Services.Users
+namespace RbacApi.Services
 {
     public interface IUserService
     {

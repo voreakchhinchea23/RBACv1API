@@ -3,7 +3,7 @@ using RbacApi.Data;
 using RbacApi.DTOs;
 using RbacApi.Models;
 
-namespace RbacApi.Services.Users
+namespace RbacApi.Services
 {
     public class UserService : IUserService
     {

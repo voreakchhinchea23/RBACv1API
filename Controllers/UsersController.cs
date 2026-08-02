@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RbacApi.Data;
 using RbacApi.DTOs;
-using RbacApi.Models;
-using RbacApi.Services.Users;
+using RbacApi.Services;
 
 namespace RbacApi.Controllers
 {
