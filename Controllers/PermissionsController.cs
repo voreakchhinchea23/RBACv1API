@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RbacApi.Authorization;
 using RbacApi.DTOs;
 using RbacApi.Services;
 
@@ -6,6 +7,7 @@ namespace RbacApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [HasPermission(Perm.PERMISSION_READ)]
     public class PermissionsController : ControllerBase
     {
         private readonly IPermissionService _permissionService;
@@ -33,6 +35,7 @@ namespace RbacApi.Controllers
         }
 
         //POST: api/permissions
+        [HasPermission(Perm.PERMISSION_CREATE)]
         [HttpPost]
         public async Task<ActionResult<PermissionResponseDto>> CreatePermission(PermissionCreateDto dto)
         {
@@ -41,6 +44,7 @@ namespace RbacApi.Controllers
         }
 
         //PUT: api/permissions/id
+        [HasPermission(Perm.PERMISSION_UPDATE)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult> UpdatePermission(PermissionUpdateDto dto, int id)
         {
@@ -50,6 +54,7 @@ namespace RbacApi.Controllers
         }
 
         //DELETE: api/permissions/id
+        [HasPermission(Perm.PERMISSION_DELETE)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeletePermission(int id)
         {

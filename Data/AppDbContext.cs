@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RbacApi.Authorization;
 using RbacApi.Models;
 
 namespace RbacApi.Data
@@ -29,6 +30,8 @@ namespace RbacApi.Data
                 .HasOne(rp => rp.Permission)
                 .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId);
+
+            
         }
         
         

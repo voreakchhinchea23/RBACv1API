@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RbacApi.Authorization;
 using RbacApi.DTOs;
 using RbacApi.Services;
 
@@ -6,6 +7,7 @@ namespace RbacApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [HasPermission(Perm.USER_READ)]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -37,6 +39,7 @@ namespace RbacApi.Controllers
         }
 
         // POST: api/users
+        [HasPermission(Perm.USER_CREATE)]
         [HttpPost]
         public async Task<ActionResult<UserResponseDto>> CreateUser(UserCreateDTO dto)
         {
@@ -45,6 +48,7 @@ namespace RbacApi.Controllers
         }
 
         //PUT api/users/id
+        [HasPermission(Perm.USER_UPDATE)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult> UpdateUser(UserUpdateDto dto, int id)
         {
@@ -58,6 +62,7 @@ namespace RbacApi.Controllers
         }
 
         // DELETE api/users/id
+        [HasPermission(Perm.USER_DELETE)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteUser(int id)
         {

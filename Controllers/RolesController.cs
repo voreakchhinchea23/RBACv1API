@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RbacApi.Authorization;
 using RbacApi.DTOs;
 using RbacApi.Services;
 
@@ -6,6 +7,7 @@ namespace RbacApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [HasPermission(Perm.ROLE_READ)]
     public class RolesController : ControllerBase
     {
         private readonly IRoleService _roleService;
@@ -32,6 +34,7 @@ namespace RbacApi.Controllers
         }
 
         // POST: api/roles
+        [HasPermission(Perm.ROLE_CREATE)]
         [HttpPost]
         public async Task<ActionResult<RoleResponseDto>> CreateRole(RoleCreateDto dto)
         {
@@ -40,6 +43,7 @@ namespace RbacApi.Controllers
         }
 
         //PUT: api/roles/id
+        [HasPermission(Perm.ROLE_UPDATE)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult> UpdateRole(RoleUpdateDto dto, int id)
         {
@@ -49,6 +53,7 @@ namespace RbacApi.Controllers
         }
 
         // DELETE: api/roles/id
+        [HasPermission(Perm.ROLE_DELETE)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteRole(int id)
         {
@@ -58,6 +63,7 @@ namespace RbacApi.Controllers
         }
 
         // POST: api/roles/assign-permissions
+        [HasPermission(Perm.ROLE_ASSIGN_PERMISSION)]
         [HttpPost("assign-permissions")]
         public async Task<ActionResult> AssignPermission(AssignPermissionsDto dto)
         {
@@ -71,6 +77,7 @@ namespace RbacApi.Controllers
         }
 
         // POST api/roles/1/permissions/5
+        [HasPermission(Perm.ROLE_ASSIGN_PERMISSION)]
         [HttpPost("{roleId:int}/permissions/{permissionId:int}")]
         public async Task<ActionResult> AddPermissionToRole(int roleId, int permissionId)
         {
@@ -85,6 +92,7 @@ namespace RbacApi.Controllers
         }
 
         // DELETE api/roles/1/permissions/5
+        [HasPermission(Perm.ROLE_ASSIGN_PERMISSION)]
         [HttpDelete("{roleId:int}/permissions/{permissionId:int}")]
         public async Task<ActionResult> RemovePermissionFromRole(int roleId, int permissionId)
         {
