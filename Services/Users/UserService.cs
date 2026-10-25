@@ -54,6 +54,16 @@ namespace RbacApi.Services
                 return false;
             }
 
+            //Prevent deleting the last Admin account
+            if (user.Role?.Name == "Admin")
+            {
+                var adminCount = await _context.Users.CountAsync(u => u.Role!.Name == "Admin");
+                if (adminCount <= 1)
+                {
+                    throw new InvalidOperationException("Action denied: Cannot delete the last remaining Administrator account.");
+                }
+            }
+
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;

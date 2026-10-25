@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using RbacApi.Authorization;
 using RbacApi.DTOs;
 using RbacApi.Services;
+using System.Security.Claims;
 
 namespace RbacApi.Controllers
 {
@@ -66,12 +67,27 @@ namespace RbacApi.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteUser(int id)
         {
-            var success = await _userService.DeleteUserAsync(id);
-            if (!success)
+            //Prevent self-deletion using JWT token claims
+            var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(currentUserIdClaim, out int currentUserId) && currentUserId == id)
             {
-                return NotFound(new { message = $"User not found." });
+                return BadRequest(new { message = "Action denied: You cannot delete your own active account." });
             }
-            return NoContent();
+            //Call service (catches the "Last Admin" error)
+            try
+            {
+                var success = await _userService.DeleteUserAsync(id);
+                if (!success)
+                {
+                    return NotFound(new { message = "User not found." });
+                }
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Returns 400 Bad Request with the "Cannot delete last Admin" message
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
