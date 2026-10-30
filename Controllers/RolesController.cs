@@ -39,17 +39,24 @@ namespace RbacApi.Controllers
         public async Task<ActionResult<RoleResponseDto>> CreateRole(RoleCreateDto dto)
         {
             var createdRole = await _roleService.CreateRoleAsync(dto);
-            return CreatedAtAction(nameof(GetRoles), new { id = createdRole.Id }, createdRole);
+            return CreatedAtAction(nameof(GetRoleById), new { id = createdRole.Id }, createdRole);
         }
 
-        //PUT: api/roles/id
+        // PUT: api/roles/id
         [HasPermission(Perm.ROLE_UPDATE)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult> UpdateRole(RoleUpdateDto dto, int id)
         {
-            var success = await _roleService.UpdateRoleAsync(dto, id);
-            if (success == false) return NotFound(new { message = $"Role not found." });
-            return NoContent();
+            try
+            {
+                var success = await _roleService.UpdateRoleAsync(dto, id);
+                if (success == false) return NotFound(new { message = $"Role not found." });
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // DELETE: api/roles/id
@@ -57,9 +64,16 @@ namespace RbacApi.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteRole(int id)
         {
-            var success = await _roleService.DeleteRoleAsync(id);
-            if (success == false) return NotFound(new { message = $"Role not found." });
-            return NoContent();
+            try
+            {
+                var success = await _roleService.DeleteRoleAsync(id);
+                if (success == false) return NotFound(new { message = $"Role not found." });
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // POST: api/roles/assign-permissions

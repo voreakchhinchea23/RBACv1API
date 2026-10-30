@@ -6,8 +6,7 @@ namespace RbacApi.DTOs
         public required string Email { get; set; }
         public required string Password { get; set; } // Raw password 
         public string? Phone { get; set; }
-        public int RoleId { get; set; }
-
-       
+        public int? RoleId { get; set; }
+        public List<int>? RoleIds { get; set; }
     }
 }

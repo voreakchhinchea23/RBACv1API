@@ -34,13 +34,13 @@ namespace RbacApi.Controllers
             return Ok(perm);
         }
 
-        //POST: api/permissions
+        // POST: api/permissions
         [HasPermission(Perm.PERMISSION_CREATE)]
         [HttpPost]
         public async Task<ActionResult<PermissionResponseDto>> CreatePermission(PermissionCreateDto dto)
         {
             var perm = await _permissionService.CreatePermissionAsync(dto);
-            return CreatedAtAction(nameof(GetPermissions), new{id = perm.Id}, perm);
+            return CreatedAtAction(nameof(GetPermissionById), new { id = perm.Id }, perm);
         }
 
         //PUT: api/permissions/id

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RbacApi.Data;
 using RbacApi.DTOs;
@@ -17,14 +17,21 @@ namespace RbacApi.Services.Auth
             _context = context;
             _config = config;
         }
+
         public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
         {
-            // find user by username
-            var user = await _context.Users.
-               Include(u => u.Role!)
-               .ThenInclude(r => r.RolePermissions)
-                .ThenInclude(rp => rp.Permission)
-            .FirstOrDefaultAsync(u => u.Username == dto.Username);
+            if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrEmpty(dto.Password))
+            {
+                return null;
+            }
+
+            // find user by username including roles and permissions
+            var user = await _context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                        .ThenInclude(r => r!.RolePermissions)
+                            .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(u => u.Username == dto.Username);
 
             if (user == null || !user.IsActive)
             {
@@ -33,25 +40,40 @@ namespace RbacApi.Services.Auth
 
             // verify password
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
-            if(!isPasswordValid)
+            if (!isPasswordValid)
             {
                 return null;
             }
 
-            // collect permissions
-            var permissions = user.Role?.RolePermissions
-                .Select(rp => rp.Permission.Name)
-                .ToList() ?? new List<string>();
+            // collect distinct roles
+            var roles = user.UserRoles
+                .Where(ur => ur.Role != null)
+                .Select(ur => ur.Role!.Name)
+                .Distinct()
+                .ToList();
 
+            // collect distinct permissions across all roles
+            var permissions = user.UserRoles
+                .Where(ur => ur.Role != null)
+                .SelectMany(ur => ur.Role!.RolePermissions)
+                .Where(rp => rp.Permission != null)
+                .Select(rp => rp.Permission!.Name)
+                .Distinct()
+                .ToList();
 
             // build JWT claims
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role?.Name ?? string.Empty)
+                new Claim(ClaimTypes.Email, user.Email)
             };
+
+            // add each role as a claim
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             // add each permission as a claim
             foreach (var perm in permissions)
@@ -73,11 +95,14 @@ namespace RbacApi.Services.Auth
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
 
+            var primaryRole = roles.FirstOrDefault() ?? "NoRole";
+
             return new LoginResponseDto
             {
                 Token = tokenString,
                 Username = user.Username,
-                Role = user.Role?.Name ?? "NoRole",
+                Role = primaryRole,
+                Roles = roles,
                 Permissions = permissions
             };
         }

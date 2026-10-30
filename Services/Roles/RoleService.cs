@@ -51,8 +51,10 @@ namespace RbacApi.Services
 
             if (role == null) return false;
 
+            var requestedPermIds = dto.PermissionIds ?? new List<int>();
+
             var validPermissionIds = await _context.Permissions
-                .Where(p => dto.PermissionIds.Contains(p.Id))
+                .Where(p => requestedPermIds.Contains(p.Id))
                 .Select(p => p.Id)
                 .ToListAsync();
 
@@ -97,6 +99,11 @@ namespace RbacApi.Services
             var role = await _context.Roles.FindAsync(id);
             if (role == null) return false;
 
+            if (role.Name == "Admin")
+            {
+                throw new InvalidOperationException("Action denied: Cannot delete the core Administrator role.");
+            }
+
             _context.Roles.Remove(role);
             await _context.SaveChangesAsync();
             return true;
@@ -117,13 +124,15 @@ namespace RbacApi.Services
                 Id = role.Id,
                 Name = role.Name,
                 Description = role.Description,
-                Permissions = role.RolePermissions.Select(rp => new PermissionResponseDto
-                {
-                    Id = rp.Permission!.Id,
-                    Name = rp.Permission.Name,
-                    Module = rp.Permission.Module,
-                    Description = rp.Permission.Description
-                }).ToList()
+                Permissions = role.RolePermissions
+                    .Where(rp => rp.Permission != null)
+                    .Select(rp => new PermissionResponseDto
+                    {
+                        Id = rp.Permission!.Id,
+                        Name = rp.Permission.Name,
+                        Module = rp.Permission.Module,
+                        Description = rp.Permission.Description
+                    }).ToList()
             };
         }
 
@@ -158,6 +167,11 @@ namespace RbacApi.Services
         {
             var role = await _context.Roles.FindAsync(id);
             if (role == null) return false;
+
+            if (role.Name == "Admin" && dto.Name != "Admin")
+            {
+                throw new InvalidOperationException("Action denied: Cannot rename the core Administrator role.");
+            }
 
             role.Name = dto.Name;
             role.Description = dto.Description;

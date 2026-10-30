@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using RbacApi.Authorization;
 using RbacApi.Models;
 
@@ -9,12 +9,13 @@ namespace RbacApi.Data
         public static async Task SeedAsync(AppDbContext context)
         {
             // =========================================================
-            // 1. SEED ROLES ("Admin", "Manager")
+            // 1. SEED ROLES ("Admin", "Manager", "Visitor")
             // =========================================================
             var rolesToSeed = new List<Role>
             {
                 new Role { Name = "Admin", Description = "Super Administrator with full permissions" },
-                new Role { Name = "Manager", Description = "Department Manager with elevated access" }
+                new Role { Name = "Manager", Description = "Department Manager with elevated access" },
+                new Role { Name = "Visitor", Description = "Visitor can only view and visit the app." }
             };
 
             foreach (var role in rolesToSeed)
@@ -56,7 +57,7 @@ namespace RbacApi.Data
 
 
             // =========================================================
-            // 3. ASSIGN ALL PERMISSIONS TO "Admin" ROLE
+            // 3. ASSIGN ALL PERMISSIONS TO "Admin" ROLE & READ TO "Visitor"
             // =========================================================
             var allDbPermissions = await context.Permissions.ToListAsync();
 
@@ -74,31 +75,69 @@ namespace RbacApi.Data
                     });
                 }
             }
+
+            var visitorRole = await context.Roles
+                .Include(r => r.RolePermissions)
+                .FirstOrDefaultAsync(r => r.Name == "Visitor");
+
+            if (visitorRole != null)
+            {
+                var readPerms = allDbPermissions
+                    .Where(p => p.Name == Perm.USER_READ || p.Name == Perm.ROLE_READ || p.Name == Perm.PERMISSION_READ)
+                    .ToList();
+
+                foreach (var perm in readPerms)
+                {
+                    if (!visitorRole.RolePermissions.Any(rp => rp.PermissionId == perm.Id))
+                    {
+                        visitorRole.RolePermissions.Add(new RolePermission
+                        {
+                            RoleId = visitorRole.Id,
+                            PermissionId = perm.Id
+                        });
+                    }
+                }
+            }
+
             await context.SaveChangesAsync();
 
 
             // =========================================================
             // 4. SEED ADMIN USER ("admin", "admin@rbac.local", "Abc123$")
             // =========================================================
-            bool adminUserExists = await context.Users
-                .AnyAsync(u => u.Username == "admin" || u.Email == "admin@rbac.local");
+            var adminUser = await context.Users
+                .Include(u => u.UserRoles)
+                .FirstOrDefaultAsync(u => u.Username == "admin" || u.Email == "admin@rbac.local");
 
-            if (!adminUserExists)
+            if (adminUser == null)
             {
                 // Hash the password securely using BCrypt
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword("Abc123$");
 
-                var adminUser = new User
+                adminUser = new User
                 {
                     Username = "admin",
                     Email = "admin@rbac.local",
                     Password = passwordHash,
-                    RoleId = adminRole.Id, // Link directly to Admin role
                     IsActive = true,
                     Phone = "0123456789"
                 };
 
                 context.Users.Add(adminUser);
+                await context.SaveChangesAsync();
+            }
+
+            // Ensure Admin role is linked via UserRole
+            bool hasAdminRole = await context.UserRoles
+                .AnyAsync(ur => ur.UserId == adminUser.Id && ur.RoleId == adminRole.Id);
+
+            if (!hasAdminRole)
+            {
+                context.UserRoles.Add(new UserRole
+                {
+                    UserId = adminUser.Id,
+                    RoleId = adminRole.Id
+                });
                 await context.SaveChangesAsync();
             }
         }

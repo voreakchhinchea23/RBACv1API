@@ -7,6 +7,7 @@ namespace RbacApi.DTOs
         public required string Email { get; set; }
         public string? Phone { get; set; }
         public bool IsActive { get; set; }
+        public List<string> Roles { get; set; } = new();
         public required string RoleName { get; set; }
     }
 }

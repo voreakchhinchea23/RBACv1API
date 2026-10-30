@@ -16,12 +16,12 @@ namespace RbacApi.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Rbac.Models.Permission", b =>
+            modelBuilder.Entity("RbacApi.Models.Permission", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,7 +30,6 @@ namespace RbacApi.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Module")
@@ -46,7 +45,7 @@ namespace RbacApi.Migrations
                     b.ToTable("Permissions");
                 });
 
-            modelBuilder.Entity("Rbac.Models.Role", b =>
+            modelBuilder.Entity("RbacApi.Models.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -66,7 +65,7 @@ namespace RbacApi.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("Rbac.Models.RolePermission", b =>
+            modelBuilder.Entity("RbacApi.Models.RolePermission", b =>
                 {
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
@@ -81,7 +80,7 @@ namespace RbacApi.Migrations
                     b.ToTable("RolePermissions");
                 });
 
-            modelBuilder.Entity("Rbac.Models.User", b =>
+            modelBuilder.Entity("RbacApi.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -103,29 +102,39 @@ namespace RbacApi.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RoleId");
-
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Rbac.Models.RolePermission", b =>
+            modelBuilder.Entity("RbacApi.Models.UserRole", b =>
                 {
-                    b.HasOne("Rbac.Models.Permission", "Permission")
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("RbacApi.Models.RolePermission", b =>
+                {
+                    b.HasOne("RbacApi.Models.Permission", "Permission")
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Rbac.Models.Role", "Role")
+                    b.HasOne("RbacApi.Models.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -136,27 +145,40 @@ namespace RbacApi.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Rbac.Models.User", b =>
+            modelBuilder.Entity("RbacApi.Models.UserRole", b =>
                 {
-                    b.HasOne("Rbac.Models.Role", "Role")
-                        .WithMany("Users")
+                    b.HasOne("RbacApi.Models.Role", "Role")
+                        .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("RbacApi.Models.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Rbac.Models.Permission", b =>
+            modelBuilder.Entity("RbacApi.Models.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
                 });
 
-            modelBuilder.Entity("Rbac.Models.Role", b =>
+            modelBuilder.Entity("RbacApi.Models.Role", b =>
                 {
                     b.Navigation("RolePermissions");
 
-                    b.Navigation("Users");
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("RbacApi.Models.User", b =>
+                {
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

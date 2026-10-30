@@ -6,9 +6,7 @@ namespace RbacApi.Models
         public required string Name { get; set; }
         public string? Description { get; set; }
 
-        public ICollection<User> Users { get; set; } = new List<User>();
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
     }
-
-    
 }
